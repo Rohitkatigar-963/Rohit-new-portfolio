@@ -188,7 +188,17 @@ const Projects = () => {
             duration: 0.8,
             stagger: 0.08,
             ease: "expo.out",
+            clearProps: "filter",
             onComplete: () => {
+              mobileCardsRef.current.forEach((card) => {
+                if (card) {
+                  gsap.set(card, {
+                    opacity: 1,
+                    filter: "none"
+                  });
+                }
+              });
+          
               if (mobileCarouselRef.current) {
                 mobileCarouselRef.current.style.overflowX = 'auto';
                 mobileCarouselRef.current.style.pointerEvents = 'auto';
@@ -309,7 +319,7 @@ const Projects = () => {
           <div 
             key={`mob-${i}`}
             ref={el => mobileCardsRef.current[i] = el}
-            className="shrink-0 w-[78vw] aspect-[16/11] snap-center will-change-transform relative z-10"
+            className="shrink-0 w-[78vw] aspect-[16/11] snap-center will-change-transform relative z-10 opacity-100"
           >
             <div className="w-full h-full rounded-[24px] overflow-hidden border border-white/15 bg-[#141414] p-6 flex flex-col justify-between shadow-[0_20px_40px_rgba(0,0,0,0.9)]">
               <div className="flex items-center justify-between">
