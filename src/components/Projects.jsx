@@ -184,7 +184,7 @@ const Projects = () => {
             y: 0,
             rotation: 0,
             scale: (i) => i === 0 ? 1 : 0.92,
-            opacity: (i) => i === 0 ? 1 : 0.5,
+            opacity: 1,
             duration: 0.8,
             stagger: 0.08,
             ease: "expo.out",
