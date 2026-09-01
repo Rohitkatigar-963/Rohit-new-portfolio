@@ -3,16 +3,21 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 
 const FORM_ENDPOINT = 'https://formsubmit.co/ajax/rohitkatigar224@gmail.com';
 
-
 const Contact = () => {
   const ref = useRef(null);
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-const [status, setStatus] = useState('');
-const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: '',
+  });
+
+  const [status, setStatus] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start end', 'end start']
+    offset: ['start end', 'end start'],
   });
 
   const y = useTransform(scrollYProgress, [0, 1], ['-10%', '20%']);
@@ -22,13 +27,19 @@ const [isSubmitting, setIsSubmitting] = useState(false);
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     setIsSubmitting(true);
     setStatus('');
-  
+
+    // Accurate timestamp in Indian Standard Time
+    const submittedAt = new Date().toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      dateStyle: 'medium',
+      timeStyle: 'medium',
+    });
+
     try {
       const response = await fetch(FORM_ENDPOINT, {
         method: 'POST',
@@ -40,14 +51,21 @@ const [isSubmitting, setIsSubmitting] = useState(false);
           name: formData.name,
           email: formData.email,
           message: formData.message,
-          _subject: 'New portfolio contact - Rohit Katigar',
+          submitted_at: submittedAt,
+          timezone: 'Asia/Kolkata (IST)',
+          _subject: 'New Portfolio Contact - Rohit Katigar',
           _template: 'table',
+          _honey: '',
         }),
       });
-  
+
       if (response.ok) {
         setStatus('success');
-        setFormData({ name: '', email: '', message: '' });
+        setFormData({
+          name: '',
+          email: '',
+          message: '',
+        });
       } else {
         setStatus('error');
       }
@@ -58,9 +76,12 @@ const [isSubmitting, setIsSubmitting] = useState(false);
     }
   };
 
-
   return (
-    <section ref={ref} id="contact" className="bg-[#0b0b0b] w-full min-h-screen relative overflow-hidden flex items-end pt-32 pb-0 border-t border-white/10 select-none">
+    <section
+      ref={ref}
+      id="contact"
+      className="bg-[#0b0b0b] w-full min-h-screen relative overflow-hidden flex items-end pt-32 pb-0 border-t border-white/10 select-none"
+    >
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-500/15 rounded-full blur-[160px] pointer-events-none z-0" />
 
       <motion.div
@@ -90,17 +111,16 @@ const [isSubmitting, setIsSubmitting] = useState(false);
               <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-ping" />
               <span>EPISODE 04 // GET IN TOUCH</span>
             </div>
+
             <span className="text-xs font-mono text-white/40 tracking-wider hidden md:block">
               // DIRECT TO ROHIT
             </span>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-12 md:gap-16 w-full">
-            <input type="hidden" name="_subject" value="New portfolio contact - Rohit Katigar" />
-            <input type="hidden" name="_template" value="table" />
-            <input type="text" name="_honey" tabIndex="-1" autoComplete="off" style={{ display: 'none' }} />
-            
-
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-12 md:gap-16 w-full"
+          >
             <div className="flex flex-col md:flex-row gap-12 md:gap-20 w-full">
               <div className="flex-1 flex flex-col gap-10">
                 <input
@@ -113,6 +133,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
                   required
                   className="w-full bg-transparent border-b border-white/20 pb-3 text-lg focus:outline-none focus:border-violet-500 transition-colors placeholder-white/40 font-medium rounded-none text-white"
                 />
+
                 <input
                   type="email"
                   id="email"
@@ -141,50 +162,62 @@ const [isSubmitting, setIsSubmitting] = useState(false);
             <div className="flex flex-col md:flex-row gap-10 mt-4 pt-6 border-t border-white/10">
               <div className="flex-1 text-sm font-light text-white/60 leading-relaxed">
                 <p className="max-w-lg">
-                  Messages submitted here are delivered to <span className="text-white">rohitkatigar224@gmail.com</span>. Use this form for hiring, internships, freelance work, or AI collaborations.
+                  Messages submitted here are delivered to{' '}
+                  <span className="text-white">
+                    rohitkatigar224@gmail.com
+                  </span>
+                  . Use this form for hiring, internships, freelance work, or AI
+                  collaborations.
                 </p>
               </div>
 
               <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6">
-                <p className="max-w-[260px] text-xs text-white/50 leading-relaxed">
-                  No account or dashboard is required on this site. The form is handled securely by FormSubmit and emailed to Rohit.
-                </p>
+                <div>
+                  <p className="max-w-[260px] text-xs text-white/50 leading-relaxed">
+                    No account or dashboard is required on this site. The form is
+                    handled securely and emailed directly to Rohit.
+                  </p>
+
+                  {status === 'success' && (
+                    <p className="mt-3 text-sm text-green-400 font-medium">
+                      ✓ Message sent successfully. I'll get back to you soon.
+                    </p>
+                  )}
+
+                  {status === 'error' && (
+                    <p className="mt-3 text-sm text-red-400 font-medium">
+                      Something went wrong. Please try again.
+                    </p>
+                  )}
+                </div>
 
                 <button
-  type="submit"
-  disabled={isSubmitting}
-  className="px-8 py-3.5 rounded bg-violet-500 text-white font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-violet-600 transition-all duration-300 group whitespace-nowrap shadow-[0_0_20px_rgba(139,92,246,0.6)] hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
->
-  {isSubmitting ? 'Sending...' : status === 'success' ? 'Message Sent ✓' : 'Send Message'}
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-8 py-3.5 rounded bg-violet-500 text-white font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-violet-600 transition-all duration-300 group whitespace-nowrap shadow-[0_0_20px_rgba(139,92,246,0.6)] hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting
+                    ? 'Sending...'
+                    : status === 'success'
+                    ? 'Message Sent ✓'
+                    : 'Send Message'}
 
-  {!isSubmitting && status !== 'success' && (
-    <svg
-      className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M14 5l7 7m0 0l-7 7m7-7H3"
-      />
-    </svg>
-  )}
-</button>
-
-{status === 'success' && (
-  <p className="text-sm text-green-400 font-medium text-center sm:text-right">
-    ✓ Message sent successfully. I'll get back to you soon.
-  </p>
-)}
-
-{status === 'error' && (
-  <p className="text-sm text-red-400 font-medium text-center sm:text-right">
-    Something went wrong. Please try again.
-  </p>
-)}
+                  {!isSubmitting && status !== 'success' && (
+                    <svg
+                      className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                      />
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
           </form>
