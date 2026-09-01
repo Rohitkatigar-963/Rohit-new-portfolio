@@ -1,12 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
-const FORM_ENDPOINT = 'https://formsubmit.co/rohitkatigar224@gmail.com';
-const REDIRECT_URL = 'https://rohit-ai-portfolio.vercel.app/?contact=success#contact';
+const FORM_ENDPOINT = 'https://formsubmit.co/ajax/rohitkatigar224@gmail.com';
+
 
 const Contact = () => {
   const ref = useRef(null);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+const [status, setStatus] = useState('');
+const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -19,6 +21,43 @@ const Contact = () => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    setIsSubmitting(true);
+    setStatus('');
+  
+    try {
+      const response = await fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+          _subject: 'New portfolio contact - Rohit Katigar',
+          _template: 'table',
+        }),
+      });
+  
+      if (response.ok) {
+        setStatus('success');
+        setFormData({ name: '', email: '', message: '' });
+      } else {
+        setStatus('error');
+      }
+    } catch (error) {
+      setStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
 
   return (
     <section ref={ref} id="contact" className="bg-[#0b0b0b] w-full min-h-screen relative overflow-hidden flex items-end pt-32 pb-0 border-t border-white/10 select-none">
@@ -56,11 +95,11 @@ const Contact = () => {
             </span>
           </div>
 
-          <form action={FORM_ENDPOINT} method="POST" className="flex flex-col gap-12 md:gap-16 w-full">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-12 md:gap-16 w-full">
             <input type="hidden" name="_subject" value="New portfolio contact - Rohit Katigar" />
             <input type="hidden" name="_template" value="table" />
             <input type="text" name="_honey" tabIndex="-1" autoComplete="off" style={{ display: 'none' }} />
-            <input type="hidden" name="_next" value={REDIRECT_URL} />
+            
 
             <div className="flex flex-col md:flex-row gap-12 md:gap-20 w-full">
               <div className="flex-1 flex flex-col gap-10">
@@ -112,14 +151,40 @@ const Contact = () => {
                 </p>
 
                 <button
-                  type="submit"
-                  className="px-8 py-3.5 rounded bg-violet-500 text-white font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-violet-600 transition-all duration-300 group whitespace-nowrap shadow-[0_0_20px_rgba(139,92,246,0.6)] hover:scale-105"
-                >
-                  Send Message
-                  <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </button>
+  type="submit"
+  disabled={isSubmitting}
+  className="px-8 py-3.5 rounded bg-violet-500 text-white font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-violet-600 transition-all duration-300 group whitespace-nowrap shadow-[0_0_20px_rgba(139,92,246,0.6)] hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+>
+  {isSubmitting ? 'Sending...' : status === 'success' ? 'Message Sent ✓' : 'Send Message'}
+
+  {!isSubmitting && status !== 'success' && (
+    <svg
+      className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M14 5l7 7m0 0l-7 7m7-7H3"
+      />
+    </svg>
+  )}
+</button>
+
+{status === 'success' && (
+  <p className="text-sm text-green-400 font-medium text-center sm:text-right">
+    ✓ Message sent successfully. I'll get back to you soon.
+  </p>
+)}
+
+{status === 'error' && (
+  <p className="text-sm text-red-400 font-medium text-center sm:text-right">
+    Something went wrong. Please try again.
+  </p>
+)}
               </div>
             </div>
           </form>
